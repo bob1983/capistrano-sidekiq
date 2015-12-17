@@ -30,8 +30,8 @@ namespace :sidekiq do
   def for_each_process(reverse = false, &block)
     pids = processes_pids
     pids.reverse! if reverse
-    pids.each_with_index do |pid_file, idx|
-      within release_path do
+    within release_path do
+      Parallel.each_with_index(pids, in_threads: processes_pids.count) do |pid_file, idx|
         yield(pid_file, idx)
       end
     end
