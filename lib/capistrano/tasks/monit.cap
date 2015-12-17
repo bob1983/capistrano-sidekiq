@@ -45,7 +45,6 @@ namespace :sidekiq do
       Array(fetch(:sidekiq_role)).each do |role_name|
         on roles(role_name) do
           processes_num = sidekiq_processes(role_name)
-          puts "Concurrency Num #{fetch(:monit_operation_concurrency_num)}"
           Parallel.each((0...processes_num), in_threads: fetch(:monit_operation_concurrency_num)) do |idx|
             begin
               sudo_if_needed "#{fetch(:monit_bin)} monitor #{sidekiq_service_name(idx)}"
