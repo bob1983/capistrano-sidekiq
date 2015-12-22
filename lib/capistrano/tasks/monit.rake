@@ -64,6 +64,30 @@ namespace :sidekiq do
       end
     end
 
+    desc 'Monitor all Sidekiq monit-service'
+    task :monitor_all do
+      on roles(fetch(:sidekiq_role)) do
+        begin
+          sudo_if_needed "#{fetch(:monit_bin)} monitor all"
+        rescue
+          invoke 'sidekiq:monit:config'
+          sudo_if_needed "#{fetch(:monit_bin)} monitor all"
+        end
+      end
+    end
+
+    desc 'Monitor all Sidekiq monit-service'
+    task :unmonitor_all do
+      on roles(fetch(:sidekiq_role)) do
+        begin
+          sudo_if_needed "#{fetch(:monit_bin)} unmonitor all"
+        rescue
+          invoke 'sidekiq:monit:config'
+          sudo_if_needed "#{fetch(:monit_bin)} unmonitor all"
+        end
+      end
+    end
+
     desc 'Start Sidekiq monit-service'
     task :start do
       on roles(fetch(:sidekiq_role)) do
