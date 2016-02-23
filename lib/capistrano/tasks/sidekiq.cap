@@ -9,6 +9,10 @@ namespace :load do
     set :sidekiq_role, -> { :app }
     set :sidekiq_processes, -> { 1 }
     set :sidekiq_options_per_process, -> { nil }
+    set :sidekiq_operation_concurrency_num, -> { 0 }
+    # Single thread. If you specify more than 2, operations (eg: sidekiq:start) is executed
+    # in multi threads. @see https://github.com/grosser/parallel#tips
+
     # Rbenv and RVM integration
     set :rbenv_map_bins, fetch(:rbenv_map_bins).to_a.concat(%w(sidekiq sidekiqctl))
     set :rvm_map_bins, fetch(:rvm_map_bins).to_a.concat(%w(sidekiq sidekiqctl))
@@ -30,8 +34,8 @@ namespace :sidekiq do
   def for_each_process(reverse = false, &block)
     pids = processes_pids
     pids.reverse! if reverse
-    pids.each_with_index do |pid_file, idx|
-      within release_path do
+    within release_path do
+      Parallel.each_with_index(pids, in_threads: fetch(:sidekiq_operation_concurrency_num)) do |pid_file, idx|
         yield(pid_file, idx)
       end
     end
