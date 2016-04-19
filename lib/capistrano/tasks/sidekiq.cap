@@ -229,6 +229,7 @@ namespace :sidekiq do
     search_paths = [
       "#{name}-#{role.hostname}-#{fetch(:stage)}.erb",
       "#{name}-#{role.hostname}.erb",
+      "#{name}-#{role}.erb",
       "#{name}-#{fetch(:stage)}.erb",
       "#{name}.erb"
     ].map { |filename| File.join(local_template_directory, filename) }
