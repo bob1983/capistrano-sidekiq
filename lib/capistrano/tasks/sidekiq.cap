@@ -226,13 +226,18 @@ namespace :sidekiq do
   def sidekiq_template(name, role)
     local_template_directory = fetch(:sidekiq_monit_templates_path)
 
-    search_paths = [
+    search_files = [
       "#{name}-#{role.hostname}-#{fetch(:stage)}.erb",
       "#{name}-#{role.hostname}.erb",
-      "#{name}-#{role}.erb",
+    ]
+
+    search_files = search_files + role.roles.map { |role| "#{name}-#{role}.erb" }
+    search_files = search_files + [
       "#{name}-#{fetch(:stage)}.erb",
       "#{name}.erb"
-    ].map { |filename| File.join(local_template_directory, filename) }
+    ]
+
+    search_paths = search_files.map { |filename| File.join(local_template_directory, filename) }
 
     global_search_path = File.expand_path(
       File.join(*%w[.. .. .. generators capistrano sidekiq monit templates], "#{name}.conf.erb"),
