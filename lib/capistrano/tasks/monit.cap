@@ -21,7 +21,8 @@ namespace :sidekiq do
 
     task :add_default_hooks do
       before 'deploy:updating',  'sidekiq:monit:unmonitor'
-      after  'deploy:published', 'sidekiq:monit:monitor'
+      after  'deploy:published', 'sidekiq:monit:config'
+      after  'sidekiq:monit:config', 'sidekiq:monit:monitor'
     end
 
     desc 'Config Sidekiq monit-service'
