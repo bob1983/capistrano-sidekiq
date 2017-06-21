@@ -5,6 +5,9 @@ namespace :load do
     set :monit_bin, -> { '/usr/bin/monit' }
     set :sidekiq_monit_default_hooks, -> { true }
     set :monit_operation_concurrency_num, -> { fetch(:sidekiq_operation_concurrency_num) }
+    set :monit_default_memory, -> { 500 }
+    # Monit memory is set to (total_memory - remaining_memory) / process_num
+    set :monit_remaining_memory, -> { 1000 }
   end
 end
 
@@ -31,12 +34,15 @@ namespace :sidekiq do
         on roles(role_name) do |role|
           @role = role
           @role_name = role_name
-          memory = capture(:free, '-m').split("\n")[1].split("\s")[1].to_i rescue memory = nil
+
+          remaining_memory = fetch(:monit_remaining_memory)
+          default_memory = fetch(:monit_default_memory)
+          total_memory = capture(:free, '-m').split("\n")[1].split("\s")[1].to_i rescue memory = nil
           processes_num = sidekiq_processes(role_name)
           if memory != 0
-            @memory = (memory - 500) / processes_num
+            @memory = (total_memory - remaining_memory) / processes_num
           else
-            @memory = 500
+            @memory = default_memory
           end
           upload_sidekiq_template 'sidekiq_monit', "#{fetch(:tmp_dir)}/monit.conf", @role
 
