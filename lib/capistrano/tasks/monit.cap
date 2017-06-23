@@ -37,13 +37,16 @@ namespace :sidekiq do
 
           remaining_memory = fetch(:monit_remaining_memory)
           default_memory = fetch(:monit_default_memory)
-          total_memory = capture(:free, '-m').split("\n")[1].split("\s")[1].to_i rescue memory = nil
+          total_memory = capture(:free, '-m').split("\n")[1].split("\s")[1].to_i rescue total_memory = nil
           processes_num = sidekiq_processes(role_name)
-          if memory != 0
-            @memory = (total_memory - remaining_memory) / processes_num
+
+          target_memory = (total_memory - remaining_memory) / processes_num if total_memory
+          @memory = if target_memory > default_memory
+            target_memory
           else
-            @memory = default_memory
+            default_memory
           end
+
           upload_sidekiq_template 'sidekiq_monit', "#{fetch(:tmp_dir)}/monit.conf", @role
 
           mv_command = "mv #{fetch(:tmp_dir)}/monit.conf #{fetch(:sidekiq_monit_conf_dir)}/#{sidekiq_service_name}.conf"
