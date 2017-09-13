@@ -64,7 +64,7 @@ namespace :sidekiq do
           begin
             sudo_if_needed "#{fetch(:monit_bin)} monitor #{sidekiq_service_name(idx)}"
           rescue
-            invoke 'sidekiq:monit:config'
+            invoke! 'sidekiq:monit:config'
             sudo_if_needed "#{fetch(:monit_bin)} monitor #{sidekiq_service_name(idx)}"
           end
         end
