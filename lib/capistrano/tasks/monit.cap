@@ -36,7 +36,7 @@ namespace :sidekiq do
 
           remaining_memory = fetch(:monit_remaining_memory)
           default_memory = fetch(:monit_default_memory)
-          total_memory = capture(:free, '-m').split("\n")[1].split("\s")[1].to_i rescue total_memory = nil
+          total_memory = capture(:free, '-m').split("\n")[1].split("\s")[1].to_i rescue total_memory = 8192
           processes_num = sidekiq_processes(role_name)
 
           target_memory = (total_memory - remaining_memory) / processes_num if total_memory
